@@ -52,6 +52,11 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
 
     //滚动条 配置计算
     const computerBarConfig = () =>{
+        // const tableClientWidth = scrollBox.current.clientWidth;
+        // const tableScrollWidth = scrollBox.current.scrollWidth;
+
+        // const tableClientHeight = scrollBox.current.clientHeight;
+        // const tableScrollHeight = scrollBox.current.scrollHeight;
 
         const table_client_width = scrollBox.current.clientWidth;
         const table_scroll_width = scrollBox.current.scrollWidth;

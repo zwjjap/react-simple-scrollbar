@@ -1,0 +1,19 @@
+{
+  "name": "react-beautiful-scrollbar",
+  "version": "1.0.2",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zwjjap/react-simple-scrollbar.git"
+  },
+  "author": "zwjjap",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zwjjap/react-simple-scrollbar/issues"
+  },
+  "homepage": "https://github.com/zwjjap/react-simple-scrollbar#readme"
+}
