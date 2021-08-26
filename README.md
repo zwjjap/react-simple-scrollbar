@@ -1,2 +1,3 @@
-# react 滚动条 插件
-# @author:zengwei
+下载
+
+npm i react-beautiful-scrollbar
