@@ -1,7 +1,9 @@
 ### 下载
 ------
 
-**npm i react-beautiful-scrollbar**
+```
+npm i react-beautiful-scrollbar
+```
 
 
 
