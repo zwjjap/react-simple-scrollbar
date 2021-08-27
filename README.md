@@ -14,7 +14,7 @@ npm i react-beautiful-scrollbar
 ------
 
 ```
-import Scrollbar from '../common/react-scrollbar';
+import Scrollbar from 'react-beautiful-scrollbar';
 
 export default APP(){
 
