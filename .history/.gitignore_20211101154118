@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mobi)
+/node_modules/
+/node_modules-
+/stories/
+/src/common/react-scrollbar/index_1.js
+/src/table/row/index1.js
+.history
+
