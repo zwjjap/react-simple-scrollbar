@@ -1,0 +1,64 @@
+@bar-width:6px;
+@bar-hover-width:9px;
+@bar-box-background-color:rgba(50, 50, 50, 0.1);
+
+@bar-item-background-color:rgba(50, 50, 50, 0.2);
+
+@bar-item-hover-background-color:rgba(50, 50, 50, 0.3);
+
+.cus-scroll-box{
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    .cus-scroll-wrap{
+        // width: 100%;
+        overflow: scroll;
+        inset:0px;
+        margin-bottom: -17px;
+        margin-right: -16.5px;
+        &::-webkit-scrollbar{
+            width: 17px;
+            height: 17px;
+        }
+        // padding-right: 17px;
+        // 垂直方向
+        .vertical-wrap{
+            height: 100%;
+            overflow: hidden;
+            background-color: @bar-box-background-color;
+            position: absolute;
+            top:0px;
+            right: 0px;
+            z-index: 100;
+            .item{
+                position: relative;
+                top: 0px;
+                background-color: @bar-item-background-color;
+                height:0px;
+                &:hover{
+                    background-color: @bar-item-hover-background-color;
+                }
+            }
+        }
+    
+        // 水平方向
+        .horizontal-wrap{
+            width: 100%;
+            overflow: hidden;
+            background-color: @bar-box-background-color;
+            position: absolute;
+            bottom:0px;
+            left: 0px;
+            z-index: 99;
+            .item{
+                background-color: @bar-item-background-color;
+                width:100px;
+                position: relative;
+                left: 0px;
+                &:hover{
+                    background-color: @bar-item-hover-background-color;
+                }
+            }
+        }
+    }
+}

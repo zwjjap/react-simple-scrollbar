@@ -3,6 +3,9 @@
 import React,{useRef,useState,useEffect,useMemo,useCallback,memo} from 'react';
 import './style/style.less';
 
+let verItemDomHeight = 30;
+let horItemDomWidth = 0;
+
 function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=9,barItem=6}){
 
     //最外层的容器dom
@@ -21,12 +24,9 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
 
     //右侧滚动条 dom
     const verItemDom = useRef(null);
-    const verItemDomHeight = 60;
     
-
     //底部滚动条 dom
     const horItemDom  = useRef(null);
-    let horItemDomWidth = 0;
 
     //储存滚动条滚动信息
     const scrollInfor = useRef({
@@ -50,49 +50,46 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
         tableScrollHeight:0
     });
 
+    const {tableClientWidth,tableScrollWidth,tableClientHeight,tableScrollHeight} = barState;
+
     //滚动条 配置计算
     const computerBarConfig = () =>{
-        // const tableClientWidth = scrollBox.current.clientWidth;
-        // const tableScrollWidth = scrollBox.current.scrollWidth;
-
-        // const tableClientHeight = scrollBox.current.clientHeight;
-        // const tableScrollHeight = scrollBox.current.scrollHeight;
 
         const table_client_width = scrollBox.current.clientWidth;
         const table_scroll_width = scrollBox.current.scrollWidth;
         const table_client_height = scrollBox.current.clientHeight;
         const table_scroll_height = scrollBox.current.scrollHeight;
 
-        if(table_client_width!=barState.tableClientWidth || table_scroll_width!=barState.tableScrollWidth || table_client_height!=barState.tableClientHeight || table_scroll_height!=barState.tableScrollHeight){
-            
+        if(table_client_width != tableClientWidth || table_scroll_width != tableScrollWidth || table_client_height != tableClientHeight || table_scroll_height != tableScrollHeight){
+
             setBarState({
                 tableClientWidth:table_client_width,
                 tableScrollWidth:table_scroll_width,
                 tableClientHeight:table_client_height,
                 tableScrollHeight:table_scroll_height
             });
-        }else{
 
-            //处理 水平滚动条 从 有 到 无
-            if(table_client_width == table_scroll_width){
-                scrollInfor.current.x = 0;
-                scrollInfor.current.x_percent = 0;
-            }
+            setTimeout(() => {
+                //处理 水平滚动条 从 有 到 无
+                if(table_client_width == table_scroll_width){
+                    scrollInfor.current.x = 0;
+                    scrollInfor.current.x_percent = 0;
+                }
 
-            scrollInfor.current.x = scrollInfor.current.x_percent * (table_scroll_width - table_client_width);
-            scrollInfor.current.y = scrollInfor.current.y_percent * (table_scroll_height - table_client_height);
+                scrollInfor.current.x = scrollInfor.current.x_percent * (table_scroll_width - table_client_width);
+                scrollInfor.current.y = scrollInfor.current.y_percent * (table_scroll_height - table_client_height);
 
-            //const  horItemDom_left = scrollInfor.current.x_percent * (table_client_width - horItemDomWidth);
-            const  horItemDom_left = scrollInfor.current.x_percent * (table_client_width - (table_client_width * table_client_width / table_scroll_width));
-
-            const  verItemDom_top = scrollInfor.current.y_percent * (table_client_height - verItemDomHeight);
+                const  horItemDom_left = scrollInfor.current.x_percent * (table_client_width - horItemDomWidth);
+                const  verItemDom_top = scrollInfor.current.y_percent * (table_client_height - verItemDomHeight);
             
-            scrollBox.current.scrollLeft = scrollInfor.current.x;
-            scrollBox.current.scrollTop = scrollInfor.current.y;
-            
-            horItemDom.current && (horItemDom.current.style.left = horItemDom_left  + 'px');
-            verItemDom.current && (verItemDom.current.style.top = verItemDom_top  + 'px');
-            handleScrollFrame();
+                scrollBox.current && (scrollBox.current.scrollLeft = scrollInfor.current.x);
+                scrollBox.current && (scrollBox.current.scrollTop = scrollInfor.current.y);
+                
+                horItemDom.current && (horItemDom.current.style.left = horItemDom_left  + 'px');
+                verItemDom.current && (verItemDom.current.style.top = verItemDom_top  + 'px');
+
+                handleScrollFrame();
+            },0);
         }
     }
 
@@ -132,7 +129,7 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     const verMouseDown = useCallback((e) => {
 
         mouseIsDown.current = true;
-
+        
         verticalItemMouseDomPos.current = e.clientY - e.target.getBoundingClientRect().y;
 
         posInfor = scrollBox.current.getBoundingClientRect()
@@ -183,9 +180,7 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     const horMouseDown = useCallback((e) => {
 
         mouseIsDown.current = true;
-
         horticalItemMouseDomPos.current = e.clientX - e.target.getBoundingClientRect().x;
-
         posInfor = scrollBox.current.getBoundingClientRect();
 
         //设置bar item 鼠标移入 高度
@@ -205,7 +200,6 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
         !mouseIsDown.current && (e.target.style[attr]= barItem + 'px')
     }
 
-    
     const documentRemoveMouseup = useCallback((e) => {
         mouseIsDown.current = false;
         horItemDom.current && (horItemDom.current.style.height =  barItem + 'px');
@@ -220,7 +214,6 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
 
         //取消document monseUp
         document.addEventListener('mouseup',documentRemoveMouseup,{passive: true});
-
         window.addEventListener('resize',computerBarConfig,{passive: true});
 
         //处理编辑表格时，存在的异常问题
@@ -230,20 +223,45 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
 
         return () => {
             window.removeEventListener('resize',computerBarConfig);
-
             window.removeEventListener('mouseup',documentRemoveMouseup);
+            scrollBox.current && scrollBox.current.removeEventListener('scroll',handlemouseWheel);
         }
     },[barState]);
 
     // 鼠标换轮滚动
     const handlemouseWheel = useCallback((e) => {
-        let deltaY = 125; //e.deltaY
+        e.preventDefault();
+
+        const currentScrollTop = e.target.scrollTop;
+        const currentScrollLeft = e.target.scrollLeft;
+
+        scrollInfor.current.y = currentScrollTop;
+        scrollInfor.current.y_percent = currentScrollTop / (barState.tableScrollHeight - barState.tableClientHeight);
+        if(scrollInfor.current.y_percent > 1){
+            return;
+        }
+
+        verItemDom.current && (verItemDom.current.style.top = (currentScrollTop * barState.tableClientHeight) / barState.tableScrollHeight  + 'px');
+        horItemDom.current && (horItemDom.current.style.left = (currentScrollLeft * barState.tableClientWidth) / barState.tableScrollWidth  + 'px');
+
+        
+        scrollInfor.current.x = currentScrollLeft;
+        scrollInfor.current.x_percent = currentScrollLeft / (barState.tableScrollWidth - barState.tableClientWidth);
+        scrollInfor.current.x_percent = scrollInfor.current.x_percent > 0.995 ? 1 : scrollInfor.current.x_percent;
+
+        handleScrollFrame();
+        
+        return;
+
+        //onwheel 事件写法，废弃
+        // let deltaY = 125; //e.deltaY
+        let deltaY = 150; //e.deltaY
         if(e.deltaY < 0){
-            deltaY = -125;
+            deltaY = -150;
         }
         //清除没必要 计算
         mouseWheelSetTime.current && clearTimeout(mouseWheelSetTime.current);
-        //const verItemDomHeight = 60; // verItemDom.current.clientHeight
+
         const t_scroll = barState.tableClientHeight - verItemDomHeight;
         const v_top = parseFloat(verItemDom.current.style && verItemDom.current.style.top || 0);
         let dis = v_top + (deltaY / barState.tableScrollHeight * barState.tableClientHeight) * 1.9;
@@ -275,38 +293,47 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
         
     }) 
 
+    //计算滚动条 高/宽度
+    // type?string h:水平  v:垂直
+    const getAttr = useCallback((type) => {
+        let result;
+        if(type == 'v'){
+            const h = tableClientHeight / tableScrollHeight * tableClientHeight;
+            // result = h > 30 ? h : 30;
+            result = h;
+            verItemDomHeight = result;
+            return result;
+        }
+        horItemDomWidth = tableClientWidth * tableClientWidth / tableScrollWidth;
+        return horItemDomWidth;
+
+    },[barState]);
 
     //组件滚动条计算 和 监听鼠标滑轮滚动
     useEffect(() => {
+        
         computerBarConfig();
-
         if(verItemDom.current){
-            scrollContainer.current.removeEventListener('wheel',handlemouseWheel);
-            scrollContainer.current.addEventListener('wheel',handlemouseWheel,{passive: false});
+            scrollBox.current.removeEventListener('scroll',handlemouseWheel);
+            scrollBox.current.addEventListener('scroll',handlemouseWheel,{passive: false});
         }  
-
-        horItemDomWidth = horItemDom.current && horItemDom.current.clientWidth || 0;
     });
-
-
-    const {tableClientWidth,tableScrollWidth,tableClientHeight,tableScrollHeight} = barState;
 
     return (
         <div className="cus-scroll-box" ref={scrollContainer}>
-            <div className="cus-scroll-wrap" ref={scrollBox} style={{...style,height:`${height}px`}}>
+            <div className="cus-scroll-wrap" ref={scrollBox} style={{...style,height:`${height + 17}px`}}>
                 {children}
                 {(tableScrollHeight > tableClientHeight) && (
                     <div className="vertical-wrap">
                         {/* style={{height:(tableClientHeight / tableScrollHeight * 100) + '%'}} */}
-                        <div ref={verItemDom} onMouseLeave={handleMouseLeave.bind(null,'width')} onMouseEnter={verMouseEnter} onMouseDown={verMouseDown} className="item" style={{width:barItem+'px'}}></div> 
+                        <div ref={verItemDom} onMouseLeave={handleMouseLeave.bind(null,'width')} onMouseEnter={verMouseEnter} onMouseDown={verMouseDown} className="item" style={{width:barItem+'px',height:getAttr('v') + 'px'}}></div> 
                     </div>
                 )}
                 {(tableScrollWidth > tableClientWidth) && (
                     <div className="horizontal-wrap">
-                        <div ref={horItemDom} onMouseLeave={handleMouseLeave.bind(null,'height')} onMouseEnter={horMouseEnter} onMouseDown={horMouseDown} className="item" style={{height:barItem+'px',width:(tableClientWidth / tableScrollWidth * 100) + '%'}}></div>
+                        <div ref={horItemDom} onMouseLeave={handleMouseLeave.bind(null,'height')} onMouseEnter={horMouseEnter} onMouseDown={horMouseDown} className="item" style={{height:barItem+'px',width:getAttr('h') + 'px'}}></div>
                     </div>
                 )}
-                
             </div>
         </div>
     )

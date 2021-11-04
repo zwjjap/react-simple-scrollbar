@@ -11,8 +11,16 @@
     overflow: hidden;
     position: relative;
     .cus-scroll-wrap{
-        width: 100%;
-        overflow: hidden;
+        // width: 100%;
+        overflow: scroll;
+        inset:0px;
+        margin-bottom: -17px;
+        margin-right: -16.5px;
+        &::-webkit-scrollbar{
+            width: 17px;
+            height: 17px;
+        }
+        // padding-right: 17px;
         // 垂直方向
         .vertical-wrap{
             height: 100%;
@@ -26,7 +34,7 @@
                 position: relative;
                 top: 0px;
                 background-color: @bar-item-background-color;
-                height:60px;
+                height:0px;
                 &:hover{
                     background-color: @bar-item-hover-background-color;
                 }
