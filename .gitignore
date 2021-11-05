@@ -1,3 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
-babel.config.js
+/node_modules
 .history
+/babel.config.js

@@ -313,7 +313,7 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     useEffect(() => {
         
         computerBarConfig();
-        if(verItemDom.current){
+        if(verItemDom.current || horItemDom.current){
             scrollBox.current.removeEventListener('scroll',handlemouseWheel);
             scrollBox.current.addEventListener('scroll',handlemouseWheel,{passive: false});
         }  
