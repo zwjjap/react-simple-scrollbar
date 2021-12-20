@@ -6,7 +6,7 @@ import './style/style.less';
 let verItemDomHeight = 30;
 let horItemDomWidth = 0;
 
-function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=9,barItem=6}){
+function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=9,barItem=6,autoHide=false}){
 
     //最外层的容器dom
     const scrollContainer = useRef(null);
@@ -96,6 +96,16 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     //对外开放滚动信息
     function handleScrollFrame(){
         handleScroll && handleScroll({...scrollInfor.current});
+    }
+
+    //
+    function scrollContainerHandleMouseEnter(status){
+        if(autoHide){
+            const verticalWrapDom = document.querySelector('.vertical-wrap');
+            const horizontalWrapDom = document.querySelector('.horizontal-wrap');
+            (verticalWrapDom && (status || !mouseIsDown.current)) && (verticalWrapDom.style.display = status ? 'block' : 'none');
+            (horizontalWrapDom && (status || !mouseIsDown.current)) && (horizontalWrapDom.style.display = status ? 'block' : 'none'); 
+        }  
     }
 
     /*******************************垂直start*************************** */
@@ -202,6 +212,9 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
 
     const documentRemoveMouseup = useCallback((e) => {
         mouseIsDown.current = false;
+
+        scrollContainerHandleMouseEnter(scrollContainer.current.contains(e.target) ? true : false);
+
         horItemDom.current && (horItemDom.current.style.height =  barItem + 'px');
         verItemDom.current && (verItemDom.current.style.width = barItem + 'px');
         document.removeEventListener('mousemove',verMouseOver);
@@ -320,17 +333,17 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     });
 
     return (
-        <div className="cus-scroll-box" ref={scrollContainer}>
+        <div className="cus-scroll-box" ref={scrollContainer} onMouseEnter={scrollContainerHandleMouseEnter.bind(this,true)} onMouseLeave={scrollContainerHandleMouseEnter.bind(this,false)}>
             <div className="cus-scroll-wrap" ref={scrollBox} style={{...style,height:`${height + 17}px`}}>
                 {children}
                 {(tableScrollHeight > tableClientHeight) && (
-                    <div className="vertical-wrap">
+                    <div className="vertical-wrap" style={{display:autoHide ? 'none' : 'block'}}>
                         {/* style={{height:(tableClientHeight / tableScrollHeight * 100) + '%'}} */}
                         <div ref={verItemDom} onMouseLeave={handleMouseLeave.bind(null,'width')} onMouseEnter={verMouseEnter} onMouseDown={verMouseDown} className="item" style={{width:barItem+'px',height:getAttr('v') + 'px'}}></div> 
                     </div>
                 )}
                 {(tableScrollWidth > tableClientWidth) && (
-                    <div className="horizontal-wrap">
+                    <div className="horizontal-wrap" style={{display:autoHide ? 'none' : 'block'}}>
                         <div ref={horItemDom} onMouseLeave={handleMouseLeave.bind(null,'height')} onMouseEnter={horMouseEnter} onMouseDown={horMouseDown} className="item" style={{height:barItem+'px',width:getAttr('h') + 'px'}}></div>
                     </div>
                 )}

@@ -1,11 +1,12 @@
 {
   "name": "react-beautiful-scrollbar",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "debug": "ncp ./dist ./lib --filter=\"^((?!node_modules).)*$\"&& babel ./dist -d ./lib"
+    "debug": "ncp ./dist ./lib --filter=\"^((?!node_modules).)*$\"&& babel ./dist -d ./lib",
+    "build": "ncp ./dist ./lib && babel ./dist -d ./lib && javascript-obfuscator ./lib --output ./lib --string-array false"
   },
   "repository": {
     "type": "git",
