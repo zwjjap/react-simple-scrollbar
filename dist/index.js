@@ -101,8 +101,8 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     //
     function scrollContainerHandleMouseEnter(status){
         if(autoHide){
-            const verticalWrapDom = document.querySelector('.vertical-wrap');
-            const horizontalWrapDom = document.querySelector('.horizontal-wrap');
+            const verticalWrapDom = scrollBox.current.querySelector('.vertical-wrap');
+            const horizontalWrapDom = scrollBox.current.querySelector('.horizontal-wrap');
             (verticalWrapDom && (status || !mouseIsDown.current)) && (verticalWrapDom.style.display = status ? 'block' : 'none');
             (horizontalWrapDom && (status || !mouseIsDown.current)) && (horizontalWrapDom.style.display = status ? 'block' : 'none'); 
         }  

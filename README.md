@@ -47,6 +47,7 @@ export default APP(){
 | *handleScroll*   | 无（函数） | 滚动函数               | function(data) |
 | *hoverBarHeight* | 9          | 鼠标进入，滚动条 高/宽 | number         |
 | *barItem*        | 6          | 滚动条 高/宽 默认值    | number         |
+| *autoHide*       | false      | 滚动条 支持自动显隐    | Boolean   |
 
 
 
