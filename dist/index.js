@@ -7,7 +7,6 @@ let verItemDomHeight = 30;
 let horItemDomWidth = 0;
 
 function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=9,barItem=6,autoHide=false}){
-
     //最外层的容器dom
     const scrollContainer = useRef(null);
 
@@ -44,6 +43,12 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
 
     //鼠标滚动定时器
     const mouseWheelSetTime = useRef(null);
+
+    //
+    const scrolling = useRef(false);
+    const lastViewScrollLeft = useRef(0);
+    const lastViewScrollTop = useRef(0);
+    const detectScrollingInterval = useRef(null);
 
     //滚动条显示变量
     const [barState,setBarState] = useState({
@@ -103,16 +108,43 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
 
     //
     function scrollContainerHandleMouseEnter(status,type){
-        
         if(status && type){
             computerBarConfig()
         }
-
+        //
         if(autoHide){
             (verticalWrap.current && (status || !mouseIsDown.current)) && (verticalWrap.current.style.display = status ? 'block' : 'none');
             (horizontalWrap.current && (status || !mouseIsDown.current)) && (horizontalWrap.current.style.display = status ? 'block' : 'none'); 
         }  
     }
+
+    function handleScrollStart(){
+  
+        computerBarConfig();
+    }
+
+    function handleScrollStop(){
+
+    }
+
+    function detectScrolling() {
+        if (scrolling.current) return;
+        scrolling.current = true;
+        handleScrollStart();
+        detectScrollingInterval.current = setInterval(() => {
+            const {x,y} = scrollInfor.current;
+            if (lastViewScrollLeft.current === x
+                && lastViewScrollTop.current === y) {
+                clearInterval(detectScrollingInterval.current);
+                scrolling.current = false;
+                handleScrollStop();
+            }
+            lastViewScrollLeft.current = x;
+            lastViewScrollTop.current = y;
+        }, 100);
+    }
+
+
 
     /*******************************垂直start*************************** */
 
@@ -143,7 +175,6 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     },[barState]);
 
     const verMouseDown = useCallback((e) => {
-
         mouseIsDown.current = true;
         
         verticalItemMouseDomPos.current = e.clientY - e.target.getBoundingClientRect().y;
@@ -159,9 +190,7 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     },[barState]);
 
     function verMouseEnter(e){
-
         computerBarConfig();
-
         e.target.style.width = hoverBarHeight + 'px';
     }
 
@@ -197,7 +226,6 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     },[barState]);
 
     const horMouseDown = useCallback((e) => {
-
         mouseIsDown.current = true;
         horticalItemMouseDomPos.current = e.clientX - e.target.getBoundingClientRect().x;
         posInfor = scrollBox.current.getBoundingClientRect();
@@ -210,9 +238,7 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     },[barState]);
 
     function horMouseEnter(e){
-
         computerBarConfig();
-
         e.target.style.height = hoverBarHeight + 'px';
     }
 
@@ -225,7 +251,7 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     const documentRemoveMouseup = useCallback((e) => {
         mouseIsDown.current = false;
 
-        scrollContainerHandleMouseEnter(scrollContainer.current.contains(e.target) ? true : false,false);
+        scrollContainer.current && scrollContainerHandleMouseEnter(scrollContainer.current.contains(e.target) ? true : false,false);
 
         horItemDom.current && (horItemDom.current.style.height =  barItem + 'px');
         verItemDom.current && (verItemDom.current.style.width = barItem + 'px');
@@ -250,6 +276,7 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
             window.removeEventListener('resize',computerBarConfig);
             window.removeEventListener('mouseup',documentRemoveMouseup);
             scrollBox.current && scrollBox.current.removeEventListener('scroll',handlemouseWheel);
+            clearInterval(detectScrollingInterval.current);
         }
     },[barState]);
 
@@ -274,47 +301,10 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
         scrollInfor.current.x_percent = currentScrollLeft / (barState.tableScrollWidth - barState.tableClientWidth);
         scrollInfor.current.x_percent = scrollInfor.current.x_percent > 0.995 ? 1 : scrollInfor.current.x_percent;
 
+        detectScrolling();
+
         handleScrollFrame();
         
-        return;
-
-        //onwheel 事件写法，废弃
-        // let deltaY = 125; //e.deltaY
-        let deltaY = 150; //e.deltaY
-        if(e.deltaY < 0){
-            deltaY = -150;
-        }
-        //清除没必要 计算
-        mouseWheelSetTime.current && clearTimeout(mouseWheelSetTime.current);
-
-        const t_scroll = barState.tableClientHeight - verItemDomHeight;
-        const v_top = parseFloat(verItemDom.current.style && verItemDom.current.style.top || 0);
-        let dis = v_top + (deltaY / barState.tableScrollHeight * barState.tableClientHeight) * 1.9;
-        
-        //减少没必要的计算
-        if(!verItemDom.current || (v_top == t_scroll && dis > v_top) || (v_top==0 && dis < 0)){
-            return;
-        }
-        
-        e.preventDefault();
-
-        if(dis > t_scroll){
-            dis =  t_scroll
-        }
-        if(dis < 0){
-            dis = 0;
-        }
-
-        mouseWheelSetTime.current = setTimeout(() => {
-            verItemDom.current.style.top = dis  + 'px';
-            
-            const scrollDis = dis / (barState.tableClientHeight - verItemDomHeight) * (barState.tableScrollHeight - barState.tableClientHeight);
-            scrollBox.current.scrollTop = scrollDis;   
-
-            scrollInfor.current.y = scrollDis;
-            scrollInfor.current.y_percent = dis / (barState.tableClientHeight - verItemDomHeight);
-            handleScrollFrame();
-        },100);
         
     }) 
 
@@ -345,7 +335,7 @@ function Scrollbar({children,style={},height='auto',handleScroll,hoverBarHeight=
     });
 
     return (
-        <div className="cus-scroll-box" ref={scrollContainer} onMouseEnter={scrollContainerHandleMouseEnter.bind(this,true,true)} onMouseLeave={scrollContainerHandleMouseEnter.bind(this,false,true)}>
+        <div className="cus-scroll-box" ref={scrollContainer} onClick={() => {computerBarConfig()}} onMouseEnter={scrollContainerHandleMouseEnter.bind(this,true,true)} onMouseLeave={scrollContainerHandleMouseEnter.bind(this,false,true)}>
             <div className="cus-scroll-wrap" ref={scrollBox} style={{...style,height:`${height + 17}px`}}>
                 {children}
                 {(tableScrollHeight > tableClientHeight) && (
