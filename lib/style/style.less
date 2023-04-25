@@ -11,14 +11,23 @@
     overflow: hidden;
     position: relative;
     .cus-scroll-wrap{
-        // width: 100%;
         overflow: scroll;
         inset:0px;
         margin-bottom: -17px;
         margin-right: -17px;
+        scrollbar-width:none;
         &::-webkit-scrollbar{
             width: 17px;
             height: 17px;
+        }
+        &::-webkit-scrollbar-track{
+            background-color: transparent;
+        }
+        &::-webkit-scrollbar-thumb{
+            background-color: transparent;
+        }
+        &::-webkit-scrollbar-button{
+            display: none;
         }
         // padding-right: 17px;
         // 垂直方向
@@ -59,6 +68,10 @@
                     background-color: @bar-item-hover-background-color;
                 }
             }
+        }
+
+        .cus-scroll-wrap-children{
+            overflow: hidden;
         }
     }
 }
